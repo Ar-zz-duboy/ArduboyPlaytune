@@ -1,4 +1,5 @@
-#include "arduboy_playtune.h"
+#include "ArduboyPlaytune.h"
+#include <avr/power.h>
 
 const byte PROGMEM tune_pin_to_timer_PGM[] = { 3, 1 };
 volatile byte *_tunes_timer1_pin_port;
@@ -50,6 +51,7 @@ void ArduboyPlaytune::initChannel(byte pin)
   pinMode(pin, OUTPUT);
   switch (timer_num) {
     case 1: // 16 bit timer
+      power_timer1_enable();
       TCCR1A = 0;
       TCCR1B = 0;
       bitWrite(TCCR1B, WGM12, 1);
@@ -58,6 +60,7 @@ void ArduboyPlaytune::initChannel(byte pin)
       _tunes_timer1_pin_mask = digitalPinToBitMask(pin);
       break;
     case 3: // 16 bit timer
+      power_timer3_enable();
       TCCR3A = 0;
       TCCR3B = 0;
       bitWrite(TCCR3B, WGM32, 1);
