@@ -1,2 +1,3 @@
-# ArduboyPlayTune
-The ArduboyPlayTune library. Based on the [PlayTune](https://github.com/jarv/PlayTune) library.
+# ArduboyPlaytune
+
+The ArduboyPlayTune library. Based on the [arduino-playtune](https://github.com/LenShustek/arduino-playtune) library.
