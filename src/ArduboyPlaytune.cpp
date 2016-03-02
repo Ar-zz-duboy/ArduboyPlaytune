@@ -1,7 +1,7 @@
 #include "ArduboyPlaytune.h"
 #include <avr/power.h>
 
-const byte PROGMEM tune_pin_to_timer_PGM[] = { 3, 1 };
+const byte PROGMEM tune_pin_to_timer_PGM[] = { 1, 3 };
 volatile byte *_tunes_timer1_pin_port;
 volatile byte _tunes_timer1_pin_mask;
 volatile int32_t timer1_toggle_count;
