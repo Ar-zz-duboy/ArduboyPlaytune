@@ -45,7 +45,7 @@ would cause a wait of 0x07d0 = 2000 decimal milliseconds or 2 seconds. Any tones
 
 ArduboyPlaytune has the ability to mute the sound output based on a boolean value returned by a provided function. A pointer to this function is passed as a parameter to the ArduboyPlaytune class constructor. The function is called by ArduboyPlaytune to determine whether to actually output sound. If sound is muted, ArduboyPlaytune still goes through the motions of playing scores and tones but it doesn't actually toggle the pins. If muting is not required, a function that just returns *true* should be provided.
 
-The function is called and tested at the point where a note or tone would begin playing. Any sounding notes will continue to play until the current wait time expires. A sounding tone will play for its duration. Sound output won't mute or start in the middle of a score wait or tone duration.
+The function is called and tested at the point where a note or tone would begin playing. Any sounding notes will continue to play until the current wait time expires. A sounding tone will play for its duration. Sound output won't mute or start in the middle of a score wait or tone duration. Note that the function will be called from within a timer interrupt service routine, at the start of each score note, so it should be as fast as possible.
 
 ## Using a single pin
 

@@ -51,6 +51,8 @@ public:
    * should be played, or "false" if all sound should be muted. If muting
    * control isn't required, provide a pointer to a function that always
    * returns "true".
+   * This function will be called from the timer interrupt service routine,
+   * at the start of each score note, so it should be as fast as possible.
    */
   ArduboyPlaytune(boolean (*outEn)());
 
