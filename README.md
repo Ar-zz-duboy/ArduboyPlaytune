@@ -16,6 +16,7 @@ There is no volume modulation. All notes and tones are played as square waves by
 ## The Score bytestream
 
 Scores **must** be stored in Flash memory (using PROGMEM), as an array of bytes. E.g.:
+
 `const byte score[] PROGMEM = {0x90,83, 0,75, 0x80, 0x90,88, 0,225, 0x80, 0xf0};`
 
 The bytestream is a series of commands that can turn notes on and off, and can start a waiting period until the next note change. Here are the details, with numbers shown in hexadecimal.
