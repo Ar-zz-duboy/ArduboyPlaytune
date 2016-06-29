@@ -58,3 +58,15 @@ When score notes and tones toggle the pin at the same time some very strange sou
 
 Functions in this library, that are available for use by sketches, are documented in file *ArduboyPlaytune.h*
 
+## Arduboy specific information
+
+- If using the Arduboy library or a library derived from it, *audio.enabled()* is appropriate to use as the *mute* function passed to the ArduboyPlaytune constructor. For example:
+
+```cpp
+Arduboy arduboy;
+ArduboyPlaytune tunes(arduboy.audio.enabled);
+```
+- ArduboyPlaytune uses timer 1, which is also used for PWM on the pins used for the Arduboy's RGB LED. Using ArduboyPlaytune and attempting to control the RGB LED using PWM, such as with *setRGBled()*, may cause problems. Controlling the RGB LED using standard digital I/O will work without conflicts.
+
+----------
+
