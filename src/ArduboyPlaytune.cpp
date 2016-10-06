@@ -1,3 +1,9 @@
+/**
+ * @file ArduboyPlaytune.cpp
+ * \brief An Arduino library that plays a one or two part musical score and
+ * generates tones. Intended for the Arduboy game system.
+ */
+
 /*****************************************************************************
 * ArduboyPlaytune
 *
@@ -315,7 +321,8 @@ void ArduboyPlaytune::tone(unsigned int frequency, unsigned long duration)
   bitWrite(TIMSK1, OCIE1A, 1);
 }
 
-void ArduboyPlaytune::toneMutesScore(boolean mute) {
+void ArduboyPlaytune::toneMutesScore(boolean mute)
+{
   tone_mutes_score = mute;
 }
 

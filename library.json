@@ -7,7 +7,7 @@
         "type": "git",
         "url": "https://github.com/Arduboy/ArduboyPlaytune.git"
     },
-    "version": "1.0.0",
+    "version": "1.0.1",
     "exclude": "extras",
     "frameworks": "arduino",
     "platforms": "atmelavr"

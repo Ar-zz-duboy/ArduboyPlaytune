@@ -66,6 +66,9 @@ Functions in this library, that are available for use by sketches, are documente
 Arduboy arduboy;
 ArduboyPlaytune tunes(arduboy.audio.enabled);
 ```
+
+- The Arduboy library defines *PIN_SPEAKER_1* and *PIN_SPEAKER_2* for the speaker pin numbers, which can be used with the *initChannel()* function.
+
 - ArduboyPlaytune uses timer 1, which is also used for PWM on the pins used for the Arduboy's RGB LED. Using ArduboyPlaytune and attempting to control the RGB LED using PWM, such as with *setRGBled()*, may cause problems. Controlling the RGB LED using standard digital I/O will work without conflicts.
 
 ----------
