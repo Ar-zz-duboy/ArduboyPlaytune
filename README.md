@@ -1,12 +1,15 @@
 # ArduboyPlaytune
 
-The ArduboyPlaytune library.
-Based on the [arduino-playtune](https://github.com/LenShustek/arduino-playtune) library.
+The ArduboyPlaytune library is maintained in a git repository hosted on [GitHub](https://github.com/) at:
 
-ArduboyPlaytune interprets a sequence of simple commands ("note on", "note off", and "wait") that represents a one or two part musical score without volume modulation. Once the score has started playing, background interrupt routines use the Arduino counters to generate notes in sequence at the right time. Two notes can play simultaneously. A separate open-source project called [MIDITONES](https://github.com/lenshustek/miditones) can generate the command sequence from a standard MIDI file.
+https://github.com/Arduboy/ArduboyPlaytune
+
+ArduboyPlaytune is based on the [arduino-playtune](https://github.com/LenShustek/arduino-playtune) library written by Len Shustek.
+
+ArduboyPlaytune interprets a sequence of simple commands ("note on", "note off", and "wait") that represents a one or two part musical score without volume modulation. Once the score has started playing, background interrupt routines use the Arduino counters to generate notes in sequence at the right time. Two notes can play simultaneously. A separate open-source project called [midi2tones](https://github.com/MLXXXp/midi2tones) can generate the command sequence from a standard MIDI file.
 
 ArduboyPlaytune can also play individual tones on the second channel, given a frequency and duration. If a score is playing when the *tone()* function is called, the tone will replace any notes assigned to the second channel for the tone's duration. By default, notes on the first channel will continue to play during the tone. By calling function
-*toneMutesScore(boolean mute)* with parameter *mute* set to *true*,
+*toneMutesScore(boolean mute)* with parameter *mute* set to `true`,
 the first channel will also be muted during a tone, so only the tone will sound.
 
 Once a score or tone starts playing, all of the processing happens in interrupt routines, so any other "real" program can be running at the same time, as long as it doesn't use the timers or output pins that ArduboyPlaytune is using.
@@ -17,7 +20,9 @@ There is no volume modulation. All notes and tones are played as square waves by
 
 Scores **must** be stored in Flash memory (using PROGMEM), as an array of bytes. E.g.:
 
-`const byte score[] PROGMEM = {0x90,83, 0,75, 0x80, 0x90,88, 0,225, 0x80, 0xf0};`
+```cpp
+const byte score[] PROGMEM = {0x90,83, 0,75, 0x80, 0x90,88, 0,225, 0x80, 0xf0};
+```
 
 The bytestream is a series of commands that can turn notes on and off, and can start a waiting period until the next note change. Here are the details, with numbers shown in hexadecimal.
 
@@ -44,7 +49,7 @@ would cause a wait of 0x07d0 = 2000 decimal milliseconds or 2 seconds. Any tones
 
 ## Audio Mute Control
 
-ArduboyPlaytune has the ability to mute the sound output based on a boolean value returned by a provided function. A pointer to this function is passed as a parameter to the ArduboyPlaytune class constructor. The function is called by ArduboyPlaytune to determine whether to actually output sound. If sound is muted, ArduboyPlaytune still goes through the motions of playing scores and tones but it doesn't actually toggle the pins. If muting is not required, a function that just returns *true* should be provided.
+ArduboyPlaytune has the ability to mute the sound output based on a boolean value returned by a provided function. A pointer to this function is passed as a parameter to the ArduboyPlaytune class constructor. The function is called by ArduboyPlaytune to determine whether to actually output sound. If sound is muted, ArduboyPlaytune still goes through the motions of playing scores and tones but it doesn't actually toggle the pins. If muting is not required, a function that just returns `true` should be provided.
 
 The function is called and tested at the point where a note or tone would begin playing. Any sounding notes will continue to play until the current wait time expires. A sounding tone will play for its duration. Sound output won't mute or start in the middle of a score wait or tone duration. Note that the function will be called from within a timer interrupt service routine, at the start of each score note, so it should be as fast as possible.
 
@@ -60,16 +65,16 @@ Functions in this library, that are available for use by sketches, are documente
 
 ## Arduboy specific information
 
-- If using the Arduboy library or a library derived from it, *audio.enabled()* is appropriate to use as the *mute* function passed to the ArduboyPlaytune constructor. For example:
+- If using the [Arduboy2](https://github.com/MLXXXp/Arduboy2) library, *audio.enabled()* is appropriate to use as the *mute* function passed to the ArduboyPlaytune constructor. For example:
 
 ```cpp
-Arduboy arduboy;
+Arduboy2 arduboy;
 ArduboyPlaytune tunes(arduboy.audio.enabled);
 ```
 
-- The Arduboy library defines *PIN_SPEAKER_1* and *PIN_SPEAKER_2* for the speaker pin numbers, which can be used with the *initChannel()* function.
+- The Arduboy2 library defines *PIN_SPEAKER_1* and *PIN_SPEAKER_2* for the speaker pin numbers, which can be used with the *initChannel()* function.
 
-- ArduboyPlaytune uses timer 1, which is also used for PWM on the pins used for the Arduboy's RGB LED. Using ArduboyPlaytune and attempting to control the RGB LED using PWM, such as with *setRGBled()*, may cause problems. Controlling the RGB LED using standard digital I/O will work without conflicts.
+- ArduboyPlaytune uses timer 1, which is also used for PWM on the pins used for the Arduboy's RGB LED. Using ArduboyPlaytune and attempting to control the RGB LED using PWM, such as with *setRGBled()*, may cause problems. Controlling the RGB LED using standard digital I/O, such as with *digitalWriteRGB()*, will work without conflicts.
 
 ----------
 
