@@ -59,10 +59,11 @@ static volatile boolean tune_playing = false; // is the score still playing?
 static volatile unsigned wait_timer_frequency2;       /* its current frequency */
 static volatile boolean wait_timer_playing = false;   /* is it currently playing a note? */
 static volatile unsigned long wait_toggle_count;      /* countdown score waits */
+static volatile boolean all_muted = false; // indicates all sound is muted
 static volatile boolean tone_playing = false;
 static volatile boolean tone_mutes_score = false;
 static volatile boolean tone_only = false; // indicates don't play score on tone channel
-static volatile boolean mute_score = false;
+static volatile boolean mute_score = false; // indicates tone playing so mute other channels
 
 // pointer to a function that indicates if sound is enabled
 static boolean (*outputEnabled)();
@@ -231,10 +232,12 @@ boolean ArduboyPlaytune::playing()
 }
 
 /* Do score commands until a "wait" is found, or the score is stopped.
-This is called initially from tune_playcore, but then is called
+This is called initially from playScore(), but then is called
 from the interrupt routine when waits expire.
+
+If CMD < 0x80, then the other 7 bits and the next byte are a
+15-bit big-endian number of msec to wait
 */
-/* if CMD < 0x80, then the other 7 bits and the next byte are a 15-bit big-endian number of msec to wait */
 void ArduboyPlaytune::step()
 {
   byte command, opcode, chan;
@@ -248,12 +251,8 @@ void ArduboyPlaytune::step()
       stopNote(chan);
     }
     else if (opcode == TUNE_OP_PLAYNOTE) { /* play note */
-      if (outputEnabled()) {
-        playNote(chan, pgm_read_byte(score_cursor++));
-      }
-      else {
-        score_cursor++;
-      }
+      all_muted = !outputEnabled();
+      playNote(chan, pgm_read_byte(score_cursor++));
     }
     else if (opcode < 0x80) { /* wait count in msec. */
       duration = ((unsigned)command << 8) | (pgm_read_byte(score_cursor++));
@@ -352,7 +351,9 @@ ISR(TIMER1_COMPA_vect)
     }
   }
   else {
-    *_tunes_timer1_pin_port ^= _tunes_timer1_pin_mask;  // toggle the pin
+    if (!all_muted) {
+      *_tunes_timer1_pin_port ^= _tunes_timer1_pin_mask;  // toggle the pin
+    }
   }
 }
 
@@ -363,7 +364,7 @@ ISR(TIMER3_COMPA_vect)
   // and use it to time score waits, whether or not it is playing a note.
 
   // toggle the pin if we're sounding a note
-  if (!mute_score && wait_timer_playing) {
+  if (wait_timer_playing && !mute_score && !all_muted) {
     *_tunes_timer3_pin_port ^= _tunes_timer3_pin_mask;
   }
 
