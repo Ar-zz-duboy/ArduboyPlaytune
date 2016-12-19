@@ -47,41 +47,41 @@
 #include "ArduboyPlaytune.h"
 #include <avr/power.h>
 
-const byte PROGMEM tune_pin_to_timer_PGM[] = { 3, 1 };
-volatile byte *_tunes_timer1_pin_port;
-volatile byte _tunes_timer1_pin_mask;
-volatile int32_t timer1_toggle_count;
-volatile byte *_tunes_timer3_pin_port;
-volatile byte _tunes_timer3_pin_mask;
-byte _tune_pins[AVAILABLE_TIMERS];
-byte _tune_num_chans = 0;
-volatile boolean tune_playing = false; // is the score still playing?
-volatile unsigned wait_timer_frequency2;       /* its current frequency */
-volatile boolean wait_timer_playing = false;   /* is it currently playing a note? */
-volatile unsigned long wait_toggle_count;      /* countdown score waits */
-volatile boolean tone_playing = false;
-volatile boolean tone_mutes_score = false;
-volatile boolean tone_only = false; // indicates don't play score on tone channel
-volatile boolean mute_score = false;
+static const byte tune_pin_to_timer[] = { 3, 1 };
+static volatile byte *_tunes_timer1_pin_port;
+static volatile byte _tunes_timer1_pin_mask;
+static volatile int32_t timer1_toggle_count;
+static volatile byte *_tunes_timer3_pin_port;
+static volatile byte _tunes_timer3_pin_mask;
+static byte _tune_pins[AVAILABLE_TIMERS];
+static byte _tune_num_chans = 0;
+static volatile boolean tune_playing = false; // is the score still playing?
+static volatile unsigned wait_timer_frequency2;       /* its current frequency */
+static volatile boolean wait_timer_playing = false;   /* is it currently playing a note? */
+static volatile unsigned long wait_toggle_count;      /* countdown score waits */
+static volatile boolean tone_playing = false;
+static volatile boolean tone_mutes_score = false;
+static volatile boolean tone_only = false; // indicates don't play score on tone channel
+static volatile boolean mute_score = false;
 
 // pointer to a function that indicates if sound is enabled
-boolean (*outputEnabled)();
+static boolean (*outputEnabled)();
 
 // pointers to your musical score and your position in said score
-volatile const byte *score_start = 0;
-volatile const byte *score_cursor = 0;
+static volatile const byte *score_start = 0;
+static volatile const byte *score_cursor = 0;
 
 // Table of midi note frequencies * 2
 //   They are times 2 for greater accuracy, yet still fits in a word.
 //   Generated from Excel by =ROUND(2*440/32*(2^((x-9)/12)),0) for 0<x<128
 // The lowest notes might not work, depending on the Arduino clock frequency
 // Ref: http://www.phy.mtu.edu/~suits/notefreqs.html
-const uint8_t PROGMEM _midi_byte_note_frequencies[48] = {
+const uint8_t _midi_byte_note_frequencies[48] PROGMEM = {
 16,17,18,19,21,22,23,24,26,28,29,31,33,35,37,39,41,44,46,49,52,55,58,62,65,
 69,73,78,82,87,92,98,104,110,117,123,131,139,147,156,165,175,185,196,208,220,
 233,247
 };
-const unsigned int PROGMEM _midi_word_note_frequencies[80] = {
+const unsigned int _midi_word_note_frequencies[80] PROGMEM = {
 262,277,294,311,330,349,370,392,415,440,466,494,523,554,587,622,659,
 698,740,784,831,880,932,988,1047,1109,1175,1245,1319,1397,1480,1568,1661,1760,
 1865,1976,2093,2217,2349,2489,2637,2794,2960,3136,3322,3520,3729,3951,4186,
@@ -103,7 +103,7 @@ void ArduboyPlaytune::initChannel(byte pin)
   if (_tune_num_chans == AVAILABLE_TIMERS)
     return;
 
-  timer_num = pgm_read_byte(tune_pin_to_timer_PGM + _tune_num_chans);
+  timer_num = tune_pin_to_timer[_tune_num_chans];
   _tune_pins[_tune_num_chans] = pin;
   if ((_tune_num_chans == 1) && (_tune_pins[0] == pin)) { // if channels 0 and 1 use the same pin
     tone_only = true; // don't play the score on channel 1
@@ -156,7 +156,7 @@ void ArduboyPlaytune::playNote(byte chan, byte note)
     return;
   }
 
-  timer_num = pgm_read_byte(tune_pin_to_timer_PGM + chan);
+  timer_num = tune_pin_to_timer[chan];
   if (note < 48) {
     frequency2 = pgm_read_byte(_midi_byte_note_frequencies + note);
   } else {
@@ -193,7 +193,7 @@ void ArduboyPlaytune::playNote(byte chan, byte note)
 void ArduboyPlaytune::stopNote(byte chan)
 {
   byte timer_num;
-  timer_num = pgm_read_byte(tune_pin_to_timer_PGM + chan);
+  timer_num = tune_pin_to_timer[chan];
   switch (timer_num) {
     case 1:
       if (!tone_playing) {
@@ -275,7 +275,7 @@ void ArduboyPlaytune::closeChannels()
 {
   byte timer_num;
   for (uint8_t chan=0; chan < _tune_num_chans; chan++) {
-    timer_num = pgm_read_byte(tune_pin_to_timer_PGM + chan);
+    timer_num = tune_pin_to_timer[chan];
     switch (timer_num) {
       case 1:
         TIMSK1 &= ~(1 << OCIE1A);
