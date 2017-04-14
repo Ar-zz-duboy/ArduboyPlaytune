@@ -99,6 +99,9 @@ ArduboyPlaytune::ArduboyPlaytune(boolean (*outEn)())
 void ArduboyPlaytune::initChannel(byte pin)
 {
   byte timer_num;
+  byte pin_port;
+  byte pin_mask;
+  volatile byte *out_reg;
 
   // we are all out of timers
   if (_tune_num_chans == AVAILABLE_TIMERS)
@@ -110,7 +113,13 @@ void ArduboyPlaytune::initChannel(byte pin)
     tone_only = true; // don't play the score on channel 1
   }
   _tune_num_chans++;
-  pinMode(pin, OUTPUT);
+
+  pin_port = digitalPinToPort(pin);
+  pin_mask = digitalPinToBitMask(pin);
+  out_reg = portOutputRegister(pin_port);
+
+  *portModeRegister(pin_port) |= pin_mask; // set pin to output mode
+
   switch (timer_num) {
     case 1: // 16 bit timer
       power_timer1_enable();
@@ -118,8 +127,8 @@ void ArduboyPlaytune::initChannel(byte pin)
       TCCR1B = 0;
       bitWrite(TCCR1B, WGM12, 1);
       bitWrite(TCCR1B, CS10, 1);
-      _tunes_timer1_pin_port = portOutputRegister(digitalPinToPort(pin));
-      _tunes_timer1_pin_mask = digitalPinToBitMask(pin);
+      _tunes_timer1_pin_port = out_reg;
+      _tunes_timer1_pin_mask = pin_mask;
       break;
     case 3: // 16 bit timer
       power_timer3_enable();
@@ -127,8 +136,8 @@ void ArduboyPlaytune::initChannel(byte pin)
       TCCR3B = 0;
       bitWrite(TCCR3B, WGM32, 1);
       bitWrite(TCCR3B, CS30, 1);
-      _tunes_timer3_pin_port = portOutputRegister(digitalPinToPort(pin));
-      _tunes_timer3_pin_mask = digitalPinToBitMask(pin);
+      _tunes_timer3_pin_port = out_reg;
+      _tunes_timer3_pin_mask = pin_mask;
       playNote(0, 60);  /* start and stop channel 0 (timer 3) on middle C so wait/delay works */
       stopNote(0);
       break;
@@ -278,12 +287,13 @@ void ArduboyPlaytune::closeChannels()
     switch (timer_num) {
       case 1:
         TIMSK1 &= ~(1 << OCIE1A);
+        *_tunes_timer1_pin_port &= ~(_tunes_timer1_pin_mask); // set pin low
         break;
       case 3:
         TIMSK3 &= ~(1 << OCIE3A);
+        *_tunes_timer3_pin_port &= ~(_tunes_timer3_pin_mask); // set pin low
         break;
     }
-    digitalWrite(_tune_pins[chan], LOW);
   }
   _tune_num_chans = 0;
   tune_playing = tone_playing = tone_only = mute_score = false;
