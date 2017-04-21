@@ -76,5 +76,20 @@ ArduboyPlaytune tunes(arduboy.audio.enabled);
 
 - ArduboyPlaytune uses timer 1, which is also used for PWM on the pins used for the Arduboy's RGB LED. Using ArduboyPlaytune and attempting to control the RGB LED using PWM, such as with *setRGBled()*, may cause problems. Controlling the RGB LED using standard digital I/O, such as with *digitalWriteRGB()*, will work without conflicts.
 
+- For the DevKit, only one pin can be used to drive the speaker, so only the first part in a score can be played. As described above under the _Using a single pin_ heading, both channels can be assigned to the same pin so that tones can also be played. To have a single sketch properly configure for either a production Arduboy or a DevKit, the following code can be used:
+
+```cpp
+  // audio setup
+  tunes.initChannel(PIN_SPEAKER_1);
+#ifndef AB_DEVKIT
+  // if not a DevKit
+  tunes.initChannel(PIN_SPEAKER_2);
+#else
+  // if it's a DevKit
+  tunes.initChannel(PIN_SPEAKER_1); // use the same pin for both channels
+  tunes.toneMutesScore(true);       // mute the score when a tone is sounding
+#endif
+```
+
 ----------
 
