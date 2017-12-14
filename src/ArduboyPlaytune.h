@@ -131,6 +131,24 @@ public:
   void playScore(const byte *score);
 
   /** \brief
+   * Set the score playback speed.
+   *
+   * \param  speed  the playback speed.
+   *
+   * \details
+   * The score can be played at any speed. Examples : 1.0 is default, 
+   * 2.0 is 2 times faster, etc
+   * 
+   * This might not work well with some scores, and too slow or too 
+   * fast playback speed can produce weird results.
+   *
+   * Setting playback speed to 0 stop current score and reset 
+   * playback speed to 1.0 (default)
+   * 
+   */
+  void scorePlaybackSpeed(float speed);   
+
+  /** \brief
    * Stop playing a score started using `playScore()`.
    *
    * \details

@@ -56,6 +56,7 @@ static volatile byte _tunes_timer3_pin_mask;
 static byte _tune_pins[AVAILABLE_TIMERS];
 static byte _tune_num_chans = 0;
 static volatile boolean tune_playing = false; // is the score still playing?
+static volatile float playback_speed = 1.0; // is the score still playing?
 static volatile unsigned wait_timer_frequency2;       /* its current frequency */
 static volatile boolean wait_timer_playing = false;   /* is it currently playing a note? */
 static volatile unsigned long wait_toggle_count;      /* countdown score waits */
@@ -228,6 +229,16 @@ void ArduboyPlaytune::playScore(const byte *score)
   tune_playing = true;  /* release the interrupt routine */
 }
 
+void ArduboyPlaytune::scorePlaybackSpeed(float speed)
+{
+  if(speed > 0) {
+    playback_speed = speed;
+  } else {
+    playback_speed = 1.0;
+    stopScore();
+  }
+}
+
 void ArduboyPlaytune::stopScore()
 {
   for (uint8_t i = 0; i < _tune_num_chans; i++)
@@ -265,7 +276,7 @@ void ArduboyPlaytune::step()
     }
     else if (opcode < 0x80) { /* wait count in msec. */
       duration = ((unsigned)command << 8) | (pgm_read_byte(score_cursor++));
-      wait_toggle_count = ((unsigned long) wait_timer_frequency2 * duration + 500) / 1000;
+      wait_toggle_count = ((unsigned long) wait_timer_frequency2 * (duration/playback_speed) + 500) / 1000;
       if (wait_toggle_count == 0) wait_toggle_count = 1;
       break;
     }
